@@ -10,6 +10,7 @@ import Compare from "./pages/Compare";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import OrderTracking from "./pages/OrderTracking";
+import Auth from "./pages/Auth";
 import "./index.css";
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
         <Navbar />
         <Routes>
           <Route path="/"                    element={<Home />} />
+          <Route path="/login"               element={<Auth />} />
           <Route path="/restaurants"         element={<Restaurants />} />
           <Route path="/restaurants/:id"     element={<RestaurantDetail />} />
           <Route path="/cuisines"            element={<Cuisines />} />

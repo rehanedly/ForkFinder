@@ -41,6 +41,19 @@ export function AppProvider({ children }) {
   const [user, setUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Auth Listener
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user || null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   // Fetch from Supabase on mount
   useEffect(() => {
     async function fetchAll() {

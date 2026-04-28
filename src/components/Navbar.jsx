@@ -2,119 +2,149 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ShoppingCart, Search, Menu, X, ChefHat } from "lucide-react";
 import { useApp } from "../context/AppContext";
+import { supabase } from "../lib/supabase";
 import "./Navbar.css";
 
 export default function Navbar() {
-  const { cartCount, searchQuery, setSearchQuery, normalizedItems } = useApp();
+  const { cartCount, searchQuery, setSearchQuery, normalizedItems, user } = useApp();
   const [menuOpen, setMenuOpen] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [showSug, setShowSug] = useState(false);
   const navigate = useNavigate();
-  const inputRef = useRef();
+  const inputRef = useRef(null);
 
-  const allNames = normalizedItems.flatMap((ni) => [
-    ni.canonical_name,
-    ...ni.aliases,
-  ]);
+  const allNames = normalizedItems.flatMap((ni) => [ni.canonical_name, ...(ni.aliases || [])]);
 
-  const handleSearch = (q) => {
-    setSearchQuery(q);
-    if (q.trim().length > 1) {
-      const filtered = [...new Set(allNames.filter((n) =>
-        n.toLowerCase().includes(q.toLowerCase())
-      ))].slice(0, 6);
-      setSuggestions(filtered);
-      setShowSug(true);
-    } else {
+  const handleChange = (e) => {
+    const val = e.target.value;
+    setSearchQuery(val);
+    if (!val) {
       setShowSug(false);
+      return;
     }
+    const matches = allNames
+      .filter((n) => n.toLowerCase().includes(val.toLowerCase()))
+      .slice(0, 5);
+    setSuggestions([...new Set(matches)]);
+    setShowSug(matches.length > 0);
+  };
+
+  const handleSelect = (sug) => {
+    setSearchQuery(sug);
+    setShowSug(false);
+    navigate(`/compare?q=${encodeURIComponent(sug)}`);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
+    if (searchQuery) {
       setShowSug(false);
-      navigate(`/compare?q=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(`/compare?q=${encodeURIComponent(searchQuery)}`);
     }
   };
 
-  const pickSuggestion = (s) => {
-    setSearchQuery(s);
-    setShowSug(false);
-    navigate(`/compare?q=${encodeURIComponent(s)}`);
-  };
-
-  // close dropdown on outside click
+  // Close suggestions on outside click
   useEffect(() => {
-    const h = (e) => {
-      if (inputRef.current && !inputRef.current.contains(e.target))
+    const handleClickOutside = (e) => {
+      if (inputRef.current && !inputRef.current.contains(e.target)) {
         setShowSug(false);
+      }
     };
-    document.addEventListener("mousedown", h);
-    return () => document.removeEventListener("mousedown", h);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  const navLinks = [
-    { to: "/", label: "Home" },
-    { to: "/restaurants", label: "Restaurants" },
-    { to: "/cuisines", label: "Menu Items" },
-    { to: "/orders", label: "My Orders" },
-  ];
 
   return (
     <nav className="navbar">
       <div className="container navbar-inner">
-        {/* Logo */}
-        <Link to="/" className="nav-logo">
-          <ChefHat size={28} />
+        <Link to="/" className="nav-logo" onClick={() => setMenuOpen(false)}>
+          <ChefHat size={26} />
           <span>Fork<span className="text-accent">Finder</span></span>
         </Link>
 
-        {/* Search */}
+        {/* Desktop Search */}
         <div className="nav-search" ref={inputRef}>
-          <form onSubmit={handleSubmit} className="input-wrap nav-search-form">
-            <Search size={16} style={{ left: 14 }} />
+          <form className="nav-search-form" onSubmit={handleSubmit}>
             <input
-              className="input input-icon nav-search-input"
-              placeholder="Search food items..."
+              type="text"
+              className="nav-search-input"
+              placeholder="Search e.g. Zinger Burger..."
               value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={handleChange}
+              onFocus={() => { if (searchQuery) setShowSug(true); }}
             />
-            <button type="submit" className="btn btn-primary btn-sm nav-search-btn">
+            <button type="submit" className="btn btn-primary nav-search-btn">
               Search
             </button>
           </form>
-          {showSug && suggestions.length > 0 && (
-            <ul className="autocomplete-dropdown slide-down">
-              {suggestions.map((s) => (
-                <li key={s} onClick={() => pickSuggestion(s)}>
-                  <Search size={13} />
-                  {s}
+          {showSug && (
+            <ul className="autocomplete-dropdown fade-up">
+              {suggestions.map((s, idx) => (
+                <li key={idx} onClick={() => handleSelect(s)}>
+                  <Search size={14} /> {s}
                 </li>
               ))}
             </ul>
           )}
         </div>
 
-        {/* Links */}
+        {/* Desktop Links */}
         <div className={`nav-links ${menuOpen ? "open" : ""}`}>
-          {navLinks.map((l) => (
-            <Link key={l.to} to={l.to} className="nav-link" onClick={() => setMenuOpen(false)}>
-              {l.label}
+          <Link to="/" className="nav-link" onClick={() => setMenuOpen(false)}>Home</Link>
+          <Link to="/restaurants" className="nav-link" onClick={() => setMenuOpen(false)}>Restaurants</Link>
+          <Link to="/cuisines" className="nav-link" onClick={() => setMenuOpen(false)}>Menu Items</Link>
+          <Link to="/orders" className="nav-link" onClick={() => setMenuOpen(false)}>My Orders</Link>
+          
+          {user ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px' }}>
+              <span className="text-sm font-medium hide-mobile">
+                {user.user_metadata?.full_name || user.email?.split('@')[0]}
+              </span>
+              <button 
+                className="btn btn-outline btn-sm hide-mobile" 
+                onClick={() => supabase.auth.signOut()}
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <Link to="/login" className="btn btn-outline btn-sm hide-mobile" style={{ marginLeft: 8 }} onClick={() => setMenuOpen(false)}>
+              Login
             </Link>
-          ))}
+          )}
+
           <Link to="/cart" className="nav-cart-btn btn btn-primary btn-sm" onClick={() => setMenuOpen(false)}>
             <ShoppingCart size={16} />
-            Cart
+            <span className="hide-mobile" style={{ marginLeft: 6 }}>Cart</span>
             {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
           </Link>
+          
+          {user && (
+           <button 
+             className="nav-link nav-mobile-only" 
+             style={{ display: 'none', background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', padding: '12px 16px', textAlign: 'left', fontWeight: 600, width: '100%' }}
+             onClick={() => { supabase.auth.signOut(); setMenuOpen(false); }}
+           >
+             Logout
+           </button>
+          )}
         </div>
 
-        {/* Hamburger */}
-        <button className="nav-hamburger" onClick={() => setMenuOpen((p) => !p)}>
-          {menuOpen ? <X size={22} /> : <Menu size={22} />}
+        <button
+          className="nav-hamburger"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle Menu"
+        >
+          {menuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
+      
+      {/* Mobile-only styles block purely for the logout trigger rendering logic if open */}
+      <style>{`
+        @media (max-width: 768px) {
+          .nav-mobile-only { display: block !important; }
+        }
+      `}</style>
     </nav>
   );
 }
