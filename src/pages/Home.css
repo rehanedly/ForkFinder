@@ -1,0 +1,195 @@
+/* Hero */
+.home-page { padding-top: 68px; }
+.hero {
+  position: relative;
+  padding: 100px 0 80px;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(230,57,70,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(230,57,70,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero-content {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+.hero-badge {
+  display: inline-flex;
+  margin-bottom: 24px;
+  animation-delay: 0.05s;
+}
+.hero-title {
+  margin-bottom: 20px;
+  animation-delay: 0.1s;
+}
+.hero-subtitle {
+  font-size: 1.1rem;
+  max-width: 520px;
+  margin: 0 auto 40px;
+  animation-delay: 0.15s;
+}
+.hero-search-wrap {
+  max-width: 660px;
+  margin: 0 auto 24px;
+  animation-delay: 0.2s;
+}
+.hero-search-form {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+.hero-input-wrap { flex: 1; }
+.hero-input {
+  height: 52px;
+  font-size: 1rem;
+  border-radius: 10px;
+}
+.hero-search-btn {
+  height: 52px;
+  white-space: nowrap;
+}
+.hero-pills {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation-delay: 0.25s;
+}
+.hero-pill {
+  padding: 6px 16px;
+  border-radius: 99px;
+  border: 1.5px solid var(--border);
+  background: var(--bg2);
+  color: var(--text2);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.hero-pill:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Stats */
+.stats-strip {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 24px 0;
+}
+.stats-inner {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+.stat-item { text-align: center; }
+.stat-n {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+}
+.stat-label { margin-top: 4px; }
+
+/* Comparison Card */
+.comparison-card {
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.comparison-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 12px;
+  gap: 12px;
+}
+.comparison-entries {
+  flex: 1;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.comp-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--bg3);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.comp-rest-name { font-size: 0.875rem; font-weight: 600; }
+.comp-price {
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.comp-lowest { color: var(--success); }
+.comp-best-badge {
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  background: rgba(34,197,94,0.15);
+  color: var(--success);
+  border-radius: 99px;
+  font-weight: 700;
+}
+.comparison-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 20px;
+  margin-top: auto;
+}
+
+/* How it works */
+.how-section {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.how-grid { margin-top: 0; }
+.how-card {
+  text-align: center;
+  padding: 40px 24px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  transition: all 0.3s ease;
+}
+.how-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+}
+.how-icon {
+  width: 64px; height: 64px;
+  border-radius: 16px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+}
+.how-step {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+.how-card h3 { margin-bottom: 8px; }
+
+@media (max-width: 640px) {
+  .hero-search-form { flex-direction: column; }
+  .stats-inner { grid-template-columns: repeat(2, 1fr); }
+}

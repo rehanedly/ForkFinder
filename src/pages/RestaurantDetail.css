@@ -1,0 +1,120 @@
+.rest-detail-banner {
+  position: relative;
+  height: 380px;
+  margin-top: 0;
+}
+.rest-detail-banner img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.rest-detail-banner-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 30%, rgba(0,0,0,0.3) 100%);
+}
+.rest-detail-banner-content {
+  position: absolute; inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px 24px 32px;
+}
+.rest-detail-info { display: flex; flex-direction: column; gap: 10px; }
+.rest-meta {
+  display: flex; gap: 20px;
+  color: rgba(255,255,255,0.6);
+  font-size: 0.85rem;
+}
+.rest-meta span { display: flex; align-items: center; gap: 5px; }
+
+.rest-detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 40px;
+  padding-bottom: 80px;
+}
+.menu-list { display: flex; flex-direction: column; gap: 12px; }
+.menu-row {
+  display: flex;
+  gap: 16px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color var(--transition);
+}
+.menu-row:hover { border-color: var(--accent); }
+.menu-row-img {
+  width: 100px; height: 80px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.menu-row-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 12px 0;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.menu-row-name { font-size: 0.95rem; font-weight: 600; }
+.menu-row-actions {
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0;
+}
+.menu-row-price {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* Reviews */
+.review-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.review-avatar {
+  width: 36px; height: 36px;
+  border-radius: 99px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.review-name { font-size: 0.875rem; font-weight: 600; }
+.review-comment { line-height: 1.5; }
+
+/* Cuisine pills reuse */
+.cuisine-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.cuisine-pill {
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1.5px solid var(--border);
+  background: var(--bg2);
+  color: var(--text2);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.cuisine-pill:hover, .cuisine-pill.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+@media (max-width: 900px) {
+  .rest-detail-layout { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,61 @@
+.cuisines-filters {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+.cuisines-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.cuisine-item-card { cursor: default; }
+.cuisine-item-img-wrap {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+.cuisine-item-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.cuisine-item-card:hover .cuisine-item-img { transform: scale(1.06); }
+.cuisine-item-cat {
+  position: absolute;
+  top: 10px; right: 10px;
+}
+.cuisine-item-avg {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 12px 0;
+  color: var(--text2);
+}
+.cuisine-item-actions {
+  display: flex; gap: 8px;
+}
+/* cuisine pills reuse */
+.cuisine-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.cuisine-pill {
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1.5px solid var(--border);
+  background: var(--bg2);
+  color: var(--text2);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.cuisine-pill:hover, .cuisine-pill.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+@media (max-width: 1024px) { .cuisines-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px)  { .cuisines-grid { grid-template-columns: 1fr; } }

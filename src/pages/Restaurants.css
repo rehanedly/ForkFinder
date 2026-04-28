@@ -1,0 +1,36 @@
+.rest-filters {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+.cuisine-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.cuisine-pill {
+  padding: 6px 16px;
+  border-radius: 99px;
+  border: 1.5px solid var(--border);
+  background: var(--bg2);
+  color: var(--text2);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.cuisine-pill:hover, .cuisine-pill.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.rating-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text2);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
