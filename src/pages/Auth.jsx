@@ -39,8 +39,6 @@ export default function Auth() {
           },
         });
         if (error) throw error;
-        // In Supabase, if email confirmations are disabled, it auto-logs in.
-        // Otherwise, they need to check email. Assuming disabled for this demo.
         navigate("/");
       }
     } catch (error) {
@@ -69,10 +67,11 @@ export default function Auth() {
           {!isLogin && (
             <div className="form-group">
               <label>Full Name</label>
-              <div className="input-with-icon">
+              <div className="input-wrap">
                 <UserIcon size={18} />
                 <input
                   type="text"
+                  className="input input-icon"
                   placeholder="Ali Hassan"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -84,10 +83,11 @@ export default function Auth() {
 
           <div className="form-group">
             <label>Email Address</label>
-            <div className="input-with-icon">
+            <div className="input-wrap">
               <Mail size={18} />
               <input
                 type="email"
+                className="input input-icon"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -98,10 +98,11 @@ export default function Auth() {
 
           <div className="form-group">
             <label>Password</label>
-            <div className="input-with-icon">
+            <div className="input-wrap">
               <Lock size={18} />
               <input
                 type="password"
+                className="input input-icon"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

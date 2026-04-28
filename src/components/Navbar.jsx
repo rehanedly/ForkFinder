@@ -67,7 +67,7 @@ export default function Navbar() {
           <form className="nav-search-form" onSubmit={handleSubmit}>
             <input
               type="text"
-              className="nav-search-input"
+              className="input nav-search-input"
               placeholder="Search e.g. Zinger Burger..."
               value={searchQuery}
               onChange={handleChange}
