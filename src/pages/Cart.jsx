@@ -30,9 +30,9 @@ export default function Cart() {
     return Object.keys(errs).length === 0;
   };
 
-  const handleOrder = () => {
+  const handleOrder = async () => {
     if (!validate()) return;
-    const orderId = placeOrder(form);
+    const orderId = await placeOrder(form);
     navigate(`/orders/${orderId}`);
   };
 
