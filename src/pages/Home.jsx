@@ -110,7 +110,7 @@ export default function Home() {
           </p>
 
           {/* Hero Search */}
-          <div className="hero-search-wrap fade-up" style={{ position: "relative" }}>
+          <div className="hero-search-wrap fade-up" style={{ position: "relative", zIndex: 100 }}>
             <form onSubmit={handleSubmit} className="hero-search-form">
               <div className="input-wrap hero-input-wrap">
                 <Search size={18} />
