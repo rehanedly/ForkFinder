@@ -112,6 +112,20 @@ export function AppProvider({ children }) {
   const cartTotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0);
 
+  const addReview = async (reviewData) => {
+    try {
+      const { data, error } = await supabase.from('reviews').insert([reviewData]).select();
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setReviews((prev) => [data[0], ...prev]);
+      }
+      return true;
+    } catch (err) {
+      console.error("Error submitting review:", err.message);
+      return false;
+    }
+  };
+
   // Place order into Supabase
   const placeOrder = async (customerInfo) => {
     const orderData = {
@@ -175,6 +189,7 @@ export function AppProvider({ children }) {
         cart, addToCart, removeFromCart, updateQty, clearCart, cartTotal, cartCount,
         orders, placeOrder, updateOrderStatus, getOrder,
         user, setUser, searchQuery, setSearchQuery,
+        addReview,
         // Global Datasets exposed to app 
         restaurants, normalizedItems, menuItems, reviews, isLoading
       }}

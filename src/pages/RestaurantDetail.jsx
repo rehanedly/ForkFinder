@@ -8,9 +8,44 @@ import "./RestaurantDetail.css";
 export default function RestaurantDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { restaurants, menuItems, reviews, addToCart, isLoading } = useApp();
+  const { restaurants, menuItems, reviews, addToCart, isLoading, user, addReview } = useApp();
   const restaurant = restaurants.find((r) => r.id === Number(id));
   const [activeCategory, setActiveCategory] = useState("All");
+
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
+  const [submittingReview, setSubmittingReview] = useState(false);
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!user) return;
+    setSubmittingReview(true);
+    
+    // Check if user already reviewed (from SRS: One review per user per restaurant)
+    const alreadyReviewed = reviews.some(r => (Number(r.restaurant_id) === Number(id) || Number(r.restaurantId) === Number(id)) && r.user_id === user.id);
+    if (alreadyReviewed) {
+      alert("You have already reviewed this restaurant.");
+      setSubmittingReview(false);
+      return;
+    }
+
+    const newReview = {
+      restaurant_id: Number(id),
+      user_id: user.id,
+      user_name: user.user_metadata?.full_name || user.email.split('@')[0],
+      rating: reviewForm.rating,
+      comment: reviewForm.comment,
+      date: new Date().toISOString().split('T')[0]
+    };
+
+    const success = await addReview(newReview);
+    if (success) {
+      setReviewForm({ rating: 5, comment: "" });
+      alert("Review posted successfully!");
+    } else {
+      alert("Failed to submit review.");
+    }
+    setSubmittingReview(false);
+  };
 
   if (isLoading) return <div className="page container empty-state"><h3>Loading...</h3></div>;
 
@@ -125,16 +160,52 @@ export default function RestaurantDetail() {
           {/* Reviews Sidebar */}
           <div className="rest-detail-sidebar">
             <h2 style={{ marginBottom: 20 }}>Reviews</h2>
+            
+            {user ? (
+              <form className="review-form card fade-up" onSubmit={handleReviewSubmit} style={{ padding: 20, marginBottom: 24 }}>
+                <h4 style={{ marginBottom: 12 }}>Leave a Review</h4>
+                <div className="form-group">
+                  <label>Rating (1-5)</label>
+                  <select 
+                    className="input" 
+                    value={reviewForm.rating} 
+                    onChange={(e) => setReviewForm({ ...reviewForm, rating: Number(e.target.value) })}
+                  >
+                    {[5,4,3,2,1].map(n => <option key={n} value={n}>{n} Stars</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Comment</label>
+                  <textarea 
+                    className="input" 
+                    rows={3} 
+                    placeholder="What did you think?"
+                    value={reviewForm.comment}
+                    onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                    required
+                  />
+                </div>
+                <button type="submit" className="btn btn-primary btn-sm" disabled={submittingReview}>
+                  {submittingReview ? "Submitting..." : "Post Review"}
+                </button>
+              </form>
+            ) : (
+              <div className="card fade-up" style={{ padding: 20, marginBottom: 24, textAlign: "center" }}>
+                <p className="text-muted text-sm" style={{ marginBottom: 12 }}>You must be logged in to leave a review.</p>
+                <Link to="/login" className="btn btn-outline btn-sm">Sign In</Link>
+              </div>
+            )}
+
             {restaurantReviews.length === 0 ? (
               <p className="text-muted text-sm">No reviews yet.</p>
             ) : (
               restaurantReviews.map((rv) => (
                 <div key={rv.id} className="review-card fade-up">
                   <div className="review-header">
-                    <div className="review-avatar">{rv.userName[0]}</div>
+                    <div className="review-avatar">{rv.user_name?.[0] || 'A'}</div>
                     <div>
-                      <div className="review-name">{rv.userName}</div>
-                      <div className="review-date text-xs text-muted">{rv.date}</div>
+                      <div className="review-name">{rv.user_name}</div>
+                      <div className="review-date text-xs text-muted">{new Date(rv.date || rv.created_at || Date.now()).toLocaleDateString()}</div>
                     </div>
                     <StarRating rating={rv.rating} />
                   </div>
