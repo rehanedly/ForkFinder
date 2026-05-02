@@ -63,7 +63,15 @@ export default function Cuisines() {
                 Also known as: {ni.aliases.join(", ")}
               </p>
               <div className="cuisine-item-avg">
-                Avg Price: <span className="text-accent">Rs {ni.avgPrice}</span>
+                {(() => {
+                  const variations = menuItems.filter(m => m.normalized_item_id === ni.id || m.normalizedItemId === ni.id);
+                  const minPrice = variations.length > 0 ? Math.min(...variations.map(v => v.price)) : ni.avgPrice || ni.avg_price;
+                  return (
+                    <>
+                      Best Price: <span className="text-accent">Rs {minPrice}</span>
+                    </>
+                  );
+                })()}
               </div>
               <div className="cuisine-item-actions">
                 <button
