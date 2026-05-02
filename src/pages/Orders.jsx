@@ -43,21 +43,6 @@ export default function Orders() {
         <h1 className="heading-lg">
           {demoRole === "Restaurant Owner" ? "Restaurant Dashboard (Orders)" : "My Orders"}
         </h1>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <span className="text-xs text-muted">Simulate Role:</span>
-          <button 
-            className={`btn btn-sm ${demoRole === 'Customer' ? 'btn-primary' : 'btn-outline'}`}
-            onClick={() => setDemoRole('Customer')}
-          >
-            Customer
-          </button>
-          <button 
-            className={`btn btn-sm ${demoRole === 'Restaurant Owner' ? 'btn-primary' : 'btn-outline'}`}
-            onClick={() => setDemoRole('Restaurant Owner')}
-          >
-            Restaurant Owner
-          </button>
-        </div>
       </div>
 
       {displayOrders.length === 0 ? (

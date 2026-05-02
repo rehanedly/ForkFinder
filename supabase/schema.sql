@@ -263,7 +263,14 @@ CREATE POLICY "Admin full access" ON public.users FOR ALL USING (public.is_admin
 CREATE POLICY "Admin full access" ON public.restaurants FOR ALL USING (public.is_admin());
 CREATE POLICY "Admin full access" ON public.normalized_items FOR ALL USING (public.is_admin());
 CREATE POLICY "Admin full access" ON public.menu_items FOR ALL USING (public.is_admin());
-CREATE POLICY "Admin full access" ON public.orders FOR ALL USING (public.is_admin());
+CREATE POLICY "Customers can create orders"
+ON public.orders
+FOR INSERT
+WITH CHECK (auth.uid() = customer_id);
+CREATE POLICY "Customers can view their orders"
+ON public.orders
+FOR SELECT
+USING (auth.uid() = customer_id);
 
 -- Owner Policies
 CREATE POLICY "Owner update own restaurant" ON public.restaurants 
