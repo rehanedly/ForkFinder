@@ -93,7 +93,19 @@ export default function Navbar() {
           <Link to="/" className="nav-link" onClick={() => setMenuOpen(false)}>Home</Link>
           <Link to="/restaurants" className="nav-link" onClick={() => setMenuOpen(false)}>Restaurants</Link>
           <Link to="/cuisines" className="nav-link" onClick={() => setMenuOpen(false)}>Menu Items</Link>
-          <Link to="/orders" className="nav-link" onClick={() => setMenuOpen(false)}>My Orders</Link>
+          {user?.role === 'Customer' && (
+            <Link to="/orders" className="nav-link" onClick={() => setMenuOpen(false)}>My Orders</Link>
+          )}
+
+          {(user?.role === 'Admin' || user?.role === 'Restaurant Owner') && (
+            <Link 
+              to={user.role === 'Admin' ? '/admin' : '/restaurant'} 
+              className="nav-link" 
+              onClick={() => setMenuOpen(false)}
+            >
+              Dashboard
+            </Link>
+          )}
           
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px' }}>
