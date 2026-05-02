@@ -239,6 +239,7 @@ ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow public read access" ON public.users FOR SELECT USING (true);
+CREATE POLICY "Allow auth users to insert profile" ON public.users FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "Allow auth users to update profile" ON public.users FOR UPDATE USING (auth.uid() = id);
 
 CREATE POLICY "Allow public read" ON public.restaurants FOR SELECT USING (true);

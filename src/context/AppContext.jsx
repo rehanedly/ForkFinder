@@ -46,11 +46,27 @@ export function AppProvider({ children }) {
     async function handleAuthChange(session) {
       if (session?.user) {
         // Fetch profile to get role
-        const { data: profile } = await supabase
+        let { data: profile, error } = await supabase
           .from('users')
           .select('*')
           .eq('id', session.user.id)
           .single();
+        
+        // Fallback: If profile missing but user is auth-ed, sync basic info
+        // This handles cases where public.users was reset but auth.users persists
+        if (error || !profile) {
+          const { data: newProfile } = await supabase
+            .from('users')
+            .upsert({
+              id: session.user.id,
+              name: session.user.user_metadata?.full_name || session.user.email,
+              email: session.user.email,
+              role: session.user.user_metadata?.role || "Customer"
+            })
+            .select()
+            .single();
+          if (newProfile) profile = newProfile;
+        }
         
         setUser({ ...session.user, ...profile });
       } else {
@@ -201,8 +217,12 @@ export function AppProvider({ children }) {
     if (!user) return;
     const { error } = await supabase
       .from('users')
-      .update(profileUpdate)
-      .eq('id', user.id);
+      .upsert({ 
+        id: user.id, 
+        email: user.email, // Required field
+        name: user.name,   // Keep existing or use update
+        ...profileUpdate 
+      });
     
     if (!error) {
       setUser(prev => ({ ...prev, ...profileUpdate }));
