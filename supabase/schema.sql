@@ -122,31 +122,63 @@ CREATE TRIGGER on_auth_user_created
 
 -- ─── SEED DATA (AUTH USERS) ──────────────────────────────────────────────────
 -- Password for all is Test123#
+-- We use static UUIDs for consistency across seed data.
 
-INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, recovery_sent_at, last_sign_in_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token, email_change, email_change_token_new, recovery_token)
+INSERT INTO auth.users (
+    instance_id, id, aud, role, email, encrypted_password, 
+    email_confirmed_at, recovery_sent_at, last_sign_in_at, 
+    raw_app_meta_data, raw_user_meta_data, created_at, updated_at, 
+    confirmation_token, email_change, email_change_token_new, recovery_token,
+    is_super_admin, is_sso_user, is_anonymous
+)
 VALUES
-('00000000-0000-0000-0000-000000000000', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'authenticated', 'authenticated', 'admin@example.com', crypt('Test123#', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"System Admin","role":"Admin"}', now(), now(), '', '', '', ''),
-('00000000-0000-0000-0000-000000000000', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'authenticated', 'authenticated', 'kfc@example.com', crypt('Test123#', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"KFC Owner","role":"Restaurant Owner"}', now(), now(), '', '', '', ''),
-('00000000-0000-0000-0000-000000000000', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'authenticated', 'authenticated', 'burgerlab@example.com', crypt('Test123#', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Burger Lab Owner","role":"Restaurant Owner"}', now(), now(), '', '', '', ''),
-('00000000-0000-0000-0000-000000000000', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 'authenticated', 'authenticated', 'john@example.com', crypt('Test123#', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"John Doe","role":"Customer"}', now(), now(), '', '', '', '');
+(
+    '00000000-0000-0000-0000-000000000000', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'authenticated', 'authenticated', 'admin@example.com', 
+    crypt('Test123#', gen_salt('bf')), now(), now(), now(), 
+    '{"provider":"email","providers":["email"]}', '{"full_name":"System Admin","role":"Admin"}', now(), now(), 
+    '', '', '', '', false, false, false
+),
+(
+    '00000000-0000-0000-0000-000000000000', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'authenticated', 'authenticated', 'kfc@example.com', 
+    crypt('Test123#', gen_salt('bf')), now(), now(), now(), 
+    '{"provider":"email","providers":["email"]}', '{"full_name":"KFC Owner","role":"Restaurant Owner"}', now(), now(), 
+    '', '', '', '', false, false, false
+),
+(
+    '00000000-0000-0000-0000-000000000000', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'authenticated', 'authenticated', 'burgerlab@example.com', 
+    crypt('Test123#', gen_salt('bf')), now(), now(), now(), 
+    '{"provider":"email","providers":["email"]}', '{"full_name":"Burger Lab Owner","role":"Restaurant Owner"}', now(), now(), 
+    '', '', '', '', false, false, false
+),
+(
+    '00000000-0000-0000-0000-000000000000', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 'authenticated', 'authenticated', 'john@example.com', 
+    crypt('Test123#', gen_salt('bf')), now(), now(), now(), 
+    '{"provider":"email","providers":["email"]}', '{"full_name":"John Doe","role":"Customer"}', now(), now(), 
+    '', '', '', '', false, false, false
+)
+ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO auth.identities (id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at, provider_id)
 VALUES
 ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', format('{"sub":"%s","email":"%s"}','a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11','admin@example.com')::jsonb, 'email', now(), now(), now(), 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'),
 ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', format('{"sub":"%s","email":"%s"}','a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12','kfc@example.com')::jsonb, 'email', now(), now(), now(), 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12'),
 ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', format('{"sub":"%s","email":"%s"}','a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13','burgerlab@example.com')::jsonb, 'email', now(), now(), now(), 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13'),
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', format('{"sub":"%s","email":"%s"}','a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14','john@example.com')::jsonb, 'email', now(), now(), now(), 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14');
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', format('{"sub":"%s","email":"%s"}','a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14','john@example.com')::jsonb, 'email', now(), now(), now(), 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14')
+ON CONFLICT (id) DO NOTHING;
 
 
 -- ─── SEED DATA (PUBLIC USERS) ─────────────────────────────────────────────────
--- Pre-populating public profiles if manual Auth insertion isn't used
 INSERT INTO public.users (id, name, email, phone, address, role)
 VALUES
 ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'System Admin', 'admin@example.com', '1234567890', 'Admin HQ', 'Admin'),
 ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'KFC Owner', 'kfc@example.com', '0987654321', 'KFC Main', 'Restaurant Owner'),
 ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'Burger Lab Owner', 'burgerlab@example.com', '1112223333', 'Lab 1', 'Restaurant Owner'),
 ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 'John Doe', 'john@example.com', '9998887777', '123 Customer St', 'Customer')
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET 
+    name = EXCLUDED.name,
+    role = EXCLUDED.role,
+    phone = EXCLUDED.phone,
+    address = EXCLUDED.address;
 
 -- ─── SEED DATA (RESTAURANTS) ────────────────────────────────────────────────
 
@@ -220,3 +252,9 @@ CREATE POLICY "Allow public insert to orders" ON public.orders FOR INSERT WITH C
 CREATE POLICY "Allow public read to personal orders" ON public.orders FOR SELECT USING (true);
 CREATE POLICY "Allow public insert to order_items" ON public.order_items FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow public read to order_items" ON public.order_items FOR SELECT USING (true);
+
+-- ─── MANUAL ROLE ELEVATION (Run after signing up via UI) ─────────────────────
+-- UPDATE public.users SET role = 'Admin' WHERE email = 'admin@example.com';
+-- UPDATE public.users SET role = 'Restaurant Owner' WHERE email = 'kfc@example.com';
+-- UPDATE public.users SET role = 'Restaurant Owner' WHERE email = 'burgerlab@example.com';
+

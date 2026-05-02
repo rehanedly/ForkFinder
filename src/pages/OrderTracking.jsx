@@ -102,12 +102,12 @@ export default function OrderTracking() {
             </div>
           </div>
 
-          {/* Demo: advance status */}
+          {/* Advance status */}
           {nextStatus && (
             <div className="card fade-up" style={{ marginTop: 16 }}>
               <div className="card-body">
                 <p className="text-muted text-sm" style={{ marginBottom: 12 }}>
-                  Simulate order progression (demo):
+                  Order progression:
                 </p>
                 <button
                   className="btn btn-primary"
