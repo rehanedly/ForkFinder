@@ -338,3 +338,16 @@ Pending → Confirmed → Preparing → Out for Delivery → Delivered
 - Online payments (Stripe/JazzCash/EasyPaisa)
 - Mobile app (React Native)
 - Ranking algorithm based on price + rating
+
+---
+
+## 11. 👥 SEED USER CREDENTIALS
+For testing and demonstration, use the following credentials (Password: `Test123#` for all):
+
+| Role | Email |
+| :--- | :--- |
+| **Admin** | `admin@example.com` |
+| **Restaurant Owner (KFC)** | `kfc@example.com` |
+| **Restaurant Owner (Burger Lab)** | `burgerlab@example.com` |
+| **Customer** | `john@example.com` |
+

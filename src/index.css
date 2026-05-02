@@ -145,7 +145,7 @@ input, textarea { font-family: var(--font); }
   font-weight: 600;
 }
 .badge-accent { background: var(--accent-dim); color: var(--accent); }
-.badge-gold   { background: #332d00; color: var(--gold); }
+.badge-gold   { max-width: fit-content; background: #332d00; color: var(--gold); }
 .badge-green  { background: #083820; color: var(--success); }
 .badge-grey   { background: var(--bg4); color: var(--text2); }
 

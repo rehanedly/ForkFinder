@@ -43,12 +43,27 @@ export function AppProvider({ children }) {
 
   // Auth Listener
   useEffect(() => {
+    async function handleAuthChange(session) {
+      if (session?.user) {
+        // Fetch profile to get role
+        const { data: profile } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        
+        setUser({ ...session.user, ...profile });
+      } else {
+        setUser(null);
+      }
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user || null);
+      handleAuthChange(session);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
+      handleAuthChange(session);
     });
 
     return () => subscription.unsubscribe();
@@ -132,6 +147,7 @@ export function AppProvider({ children }) {
       customer_name: customerInfo.name,
       customer_phone: customerInfo.phone,
       customer_address: customerInfo.address,
+      customer_id: user?.id || null, // Link to public.users
       total: cartTotal,
       status: "Pending"
     };
@@ -181,6 +197,18 @@ export function AppProvider({ children }) {
     }
   };
 
+  const updateUserProfile = async (profileUpdate) => {
+    if (!user) return;
+    const { error } = await supabase
+      .from('users')
+      .update(profileUpdate)
+      .eq('id', user.id);
+    
+    if (!error) {
+      setUser(prev => ({ ...prev, ...profileUpdate }));
+    }
+  };
+
   const getOrder = (orderId) => orders.find((o) => o.id === Number(orderId));
 
   return (
@@ -189,7 +217,7 @@ export function AppProvider({ children }) {
         cart, addToCart, removeFromCart, updateQty, clearCart, cartTotal, cartCount,
         orders, placeOrder, updateOrderStatus, getOrder,
         user, setUser, searchQuery, setSearchQuery,
-        addReview,
+        addReview, updateUserProfile,
         // Global Datasets exposed to app 
         restaurants, normalizedItems, menuItems, reviews, isLoading
       }}

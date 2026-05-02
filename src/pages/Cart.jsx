@@ -1,17 +1,28 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { useApp } from "../context/AppContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./Cart.css";
 
 const STATUS_FLOW = ["Pending", "Confirmed", "Preparing", "Out for Delivery", "Delivered"];
 
 export default function Cart() {
-  const { cart, removeFromCart, updateQty, cartTotal, placeOrder } = useApp();
+  const { cart, removeFromCart, updateQty, cartTotal, placeOrder, user, updateUserProfile } = useApp();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", phone: "", address: "" });
   const [errors, setErrors] = useState({});
   const [step, setStep] = useState("cart"); // cart | checkout
+
+  // Prefill form if user is logged in
+  useEffect(() => {
+    if (user) {
+      setForm({
+        name: user.name || user.user_metadata?.full_name || "",
+        phone: user.phone || "",
+        address: user.address || ""
+      });
+    }
+  }, [user]);
 
   // Group items by restaurant
   const grouped = cart.reduce((acc, item) => {
@@ -32,8 +43,31 @@ export default function Cart() {
 
   const handleOrder = async () => {
     if (!validate()) return;
+    
+    // Save/Update address and phone to public.users if logged in
+    if (user) {
+      await updateUserProfile({
+        name: form.name,
+        phone: form.phone,
+        address: form.address
+      });
+    }
+
     const orderId = await placeOrder(form);
-    navigate(`/orders/${orderId}`);
+    if (orderId) {
+      navigate(`/orders/${orderId}`);
+    } else {
+      alert("Failed to place order.");
+    }
+  };
+
+  const handleCheckoutClick = () => {
+    if (!user) {
+      // Intercept to force login/signup as per SRS 4.6
+      navigate("/login?redirect=/cart");
+    } else {
+      setStep("checkout");
+    }
   };
 
   if (cart.length === 0) {
@@ -148,13 +182,13 @@ export default function Cart() {
               <span className="summary-total-val">Rs {cartTotal}</span>
             </div>
             {step === "cart" ? (
-              <button className="btn btn-primary btn-lg" style={{ width: "100%", justifyContent: "center", marginTop: 16 }} onClick={() => setStep("checkout")}>
-                Proceed to Checkout
+              <button className="btn btn-primary btn-lg" style={{ width: "100%", justifyContent: "center", marginTop: 16 }} onClick={handleCheckoutClick}>
+                {user ? "Proceed to Checkout" : "Login to Checkout"}
               </button>
             ) : (
               <>
                 <button className="btn btn-primary btn-lg" style={{ width: "100%", justifyContent: "center", marginTop: 16 }} onClick={handleOrder}>
-                  Place Order (COD)
+                  Place Order
                 </button>
                 <button className="btn btn-ghost btn-sm" style={{ width: "100%", justifyContent: "center", marginTop: 8 }} onClick={() => setStep("cart")}>
                   Back to Cart

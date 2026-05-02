@@ -11,6 +11,9 @@ import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import OrderTracking from "./pages/OrderTracking";
 import Auth from "./pages/Auth";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminDashboard from "./pages/AdminDashboard";
+import RestaurantDashboard from "./pages/RestaurantDashboard";
 import "./index.css";
 
 export default function App() {
@@ -28,6 +31,16 @@ export default function App() {
           <Route path="/cart"                element={<Cart />} />
           <Route path="/orders"              element={<Orders />} />
           <Route path="/orders/:id"          element={<OrderTracking />} />
+          
+          {/* Protected Admin Routes */}
+          <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
+            <Route path="/admin/*"             element={<AdminDashboard />} />
+          </Route>
+
+          {/* Protected Restaurant Routes */}
+          <Route element={<ProtectedRoute allowedRoles={['Restaurant Owner']} />}>
+            <Route path="/restaurant/*"        element={<RestaurantDashboard />} />
+          </Route>
         </Routes>
         <Footer />
       </AppProvider>

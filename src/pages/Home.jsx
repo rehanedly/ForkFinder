@@ -58,12 +58,11 @@ export default function Home() {
   const [showSug, setShowSug] = useState(false);
   const navigate = useNavigate();
 
-  // Temporary static featured comparisons logic
-  const featuredComparisons = [
-    { normalizedItemId: 1, label: "Zinger Burger" },
-    { normalizedItemId: 3, label: "Fries" },
-    { normalizedItemId: 2, label: "Chicken Burger" },
-  ];
+  const popularComparisons = normalizedItems
+    .filter(ni => ni.popular)
+    .map(ni => ({ normalizedItemId: ni.id, label: ni.canonical_name }));
+  
+  const featuredNormalizedItems = normalizedItems.filter(ni => ni.featured);
 
   const allNames = normalizedItems.flatMap((ni) => [ni.canonical_name, ...ni.aliases]);
 
@@ -171,8 +170,37 @@ export default function Home() {
           <a href="/cuisines" className="view-all">View all <ArrowRight size={14} /></a>
         </div>
         <div className="grid-3">
-          {featuredComparisons.map((fc) => (
+          {popularComparisons.map((fc) => (
             <ComparisonCard key={fc.normalizedItemId} item={fc} menuItems={menuItems} restaurants={restaurants} />
+          ))}
+        </div>
+      </section>
+
+      {/* ─── Featured Cuisines ───────────────────────────────────── */}
+      <section className="section container">
+        <div className="section-header">
+          <h2>🔥 Featured Cuisines</h2>
+          <a href="/cuisines" className="view-all">View all <ArrowRight size={14} /></a>
+        </div>
+        <div className="cuisines-grid" style={{ marginTop: 24 }}>
+          {featuredNormalizedItems.map((ni) => (
+            <div key={ni.id} className="cuisine-item-card card fade-up" style={{ minWidth: "auto" }}>
+              <div className="cuisine-item-img-wrap" style={{ height: 160 }}>
+                <img src={ni.image} alt={ni.canonical_name} className="cuisine-item-img" />
+                <span className="badge badge-accent cuisine-item-cat">{ni.category}</span>
+              </div>
+              <div className="card-body">
+                <h3 className="heading-md">{ni.canonical_name}</h3>
+                <div className="cuisine-item-avg">Avg Price: Rs {ni.avgPrice}</div>
+                <button
+                  className="btn btn-outline btn-sm"
+                  style={{ width: "100%", marginTop: 12 }}
+                  onClick={() => navigate(`/compare?q=${encodeURIComponent(ni.canonical_name)}`)}
+                >
+                  <Scale size={13} /> Compare
+                </button>
+              </div>
+            </div>
           ))}
         </div>
       </section>

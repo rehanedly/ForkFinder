@@ -8,6 +8,7 @@ export default function Restaurants() {
   const { restaurants, isLoading } = useApp();
   const [cuisine, setCuisine] = useState("All");
   const [minRating, setMinRating] = useState(0);
+  const [priceRange, setPriceRange] = useState("All");
   const [search, setSearch] = useState("");
 
   const CUISINES = useMemo(() => {
@@ -17,9 +18,10 @@ export default function Restaurants() {
   const filtered = useMemo(() => restaurants.filter((r) => {
     const matchCuisine = cuisine === "All" || r.cuisine === cuisine;
     const matchRating  = r.rating >= minRating;
+    const matchPrice   = priceRange === "All" || r.price_range === priceRange || r.priceRange === priceRange;
     const matchSearch  = r.name.toLowerCase().includes(search.toLowerCase());
-    return matchCuisine && matchRating && matchSearch;
-  }), [restaurants, cuisine, minRating, search]);
+    return matchCuisine && matchRating && matchPrice && matchSearch;
+  }), [restaurants, cuisine, minRating, priceRange, search]);
 
   return (
     <div className="page container">
@@ -52,7 +54,7 @@ export default function Restaurants() {
         </div>
         <div className="rating-filter">
           <SlidersHorizontal size={14} />
-          <label>Min Rating</label>
+          <label>Rating</label>
           <select
             className="input"
             style={{ width: "auto", padding: "8px 12px" }}
@@ -61,6 +63,19 @@ export default function Restaurants() {
           >
             {[0, 3, 3.5, 4, 4.2, 4.5].map((v) => (
               <option key={v} value={v}>{v === 0 ? "Any" : `${v}+`}</option>
+            ))}
+          </select>
+        </div>
+        <div className="rating-filter">
+          <label>Price</label>
+          <select
+            className="input"
+            style={{ width: "auto", padding: "8px 12px" }}
+            value={priceRange}
+            onChange={(e) => setPriceRange(e.target.value)}
+          >
+            {["All", "$", "$$", "$$$"].map((v) => (
+              <option key={v} value={v}>{v}</option>
             ))}
           </select>
         </div>

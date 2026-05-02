@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, ArrowRight, Scale } from "lucide-react";
+import { Search, ArrowRight, Scale, ShoppingCart } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import "./Cuisines.css";
 
 export default function Cuisines() {
-  const { normalizedItems, isLoading } = useApp();
+  const { normalizedItems, menuItems, addToCart, restaurants, isLoading } = useApp();
   const [cat, setCat] = useState("All");
   const [search, setSearch] = useState("");
+  const [addedId, setAddedId] = useState(null);
   const navigate = useNavigate();
 
   const CATEGORIES = ["All", ...new Set(normalizedItems.map((i) => i.category))];
@@ -66,10 +67,31 @@ export default function Cuisines() {
               </div>
               <div className="cuisine-item-actions">
                 <button
-                  className="btn btn-primary btn-sm"
+                  className="btn btn-outline btn-sm"
                   onClick={() => navigate(`/compare?q=${encodeURIComponent(ni.canonical_name)}`)}
                 >
                   <Scale size={13} /> Compare
+                </button>
+                <button
+                  className="btn btn-primary btn-sm"
+                  onClick={() => {
+                    const firstMenu = menuItems.find(m => m.normalized_item_id === ni.id || m.normalizedItemId === ni.id);
+                    if (firstMenu) {
+                      const rest = restaurants.find(r => r.id === firstMenu.restaurant_id || r.id === firstMenu.restaurantId);
+                      addToCart({
+                        menuItemId: firstMenu.id,
+                        name: firstMenu.name,
+                        price: firstMenu.price,
+                        restaurantId: firstMenu.restaurant_id || firstMenu.restaurantId,
+                        restaurantName: rest?.name || "Restaurant",
+                        image: firstMenu.image
+                      });
+                      setAddedId(ni.id);
+                      setTimeout(() => setAddedId(null), 1500);
+                    }
+                  }}
+                >
+                  <ShoppingCart size={13} /> {addedId === ni.id ? "Added!" : "Add"}
                 </button>
               </div>
             </div>

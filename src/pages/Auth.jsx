@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { ChefHat, Mail, Lock, User as UserIcon } from "lucide-react";
 import "./Auth.css";
@@ -13,6 +13,8 @@ export default function Auth() {
   const [errorMsg, setErrorMsg] = useState("");
   
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,7 +28,7 @@ export default function Auth() {
           password,
         });
         if (error) throw error;
-        navigate("/");
+        navigate(redirect);
       } else {
         const { error } = await supabase.auth.signUp({
           email,
@@ -39,7 +41,7 @@ export default function Auth() {
           },
         });
         if (error) throw error;
-        navigate("/");
+        navigate(redirect);
       }
     } catch (error) {
       setErrorMsg(error.message);
