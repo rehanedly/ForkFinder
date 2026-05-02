@@ -167,6 +167,9 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 
+-- ─── CLEANUP (Optional - only run if you want a fresh seed for data) ──────────
+-- TRUNCATE public.order_items, public.orders, public.reviews, public.menu_items, public.normalized_items, public.restaurants CASCADE;
+
 -- ─── SEED DATA (PUBLIC USERS) ─────────────────────────────────────────────────
 INSERT INTO public.users (id, name, email, phone, address, role)
 VALUES
@@ -181,7 +184,6 @@ ON CONFLICT (id) DO UPDATE SET
     address = EXCLUDED.address;
 
 -- ─── SEED DATA (RESTAURANTS) ────────────────────────────────────────────────
-
 INSERT INTO public.restaurants (id, owner_id, name, cuisine, address, image, rating, reviews, featured, open_hours, price_range, tags)
 VALUES
 (1, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'KFC', 'Fast Food', 'Main Boulevard, Lahore', 'https://placehold.co/800x600/3d1218/e63946?text=KFC', 4.5, 1240, true, '10:00 AM – 11:00 PM', '$$', ARRAY['Chicken', 'Burgers', 'Fast Food']),
@@ -189,12 +191,13 @@ VALUES
 (3, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'Foodie Hut', 'Fast Food', 'Gulberg III, Lahore', 'https://placehold.co/800x600/3d1218/e63946?text=Foodie+Hut', 4.2, 560, false, '11:00 AM – 10:00 PM', '$', ARRAY['Budget Bites', 'Chicken', 'Fast Food']),
 (4, NULL, 'Pizza Max', 'Pizza', 'Canal Road, Lahore', 'https://placehold.co/800x600/3d1218/e63946?text=Pizza+Max', 4.3, 730, true, '12:00 PM – 11:00 PM', '$$', ARRAY['Pizza', 'Pasta', 'Italian']),
 (5, NULL, 'Shawarma Corner', 'Middle Eastern', 'MM Alam Road, Lahore', 'https://placehold.co/800x600/3d1218/e63946?text=Shawarma+Corner', 4.1, 410, false, '1:00 PM – 2:00 AM', '$', ARRAY['Shawarma', 'Middle Eastern', 'Wraps'])
-ON CONFLICT (id) DO UPDATE SET featured = EXCLUDED.featured;
+ON CONFLICT (id) DO UPDATE SET 
+    featured = EXCLUDED.featured,
+    owner_id = EXCLUDED.owner_id;
 
 SELECT setval('restaurants_id_seq', (SELECT MAX(id) FROM public.restaurants));
 
 -- ─── SEED DATA (ITEMS) ─────────────────────────────────────────────────────
-
 INSERT INTO public.normalized_items (id, canonical_name, image, aliases, category, avg_price, featured, popular)
 VALUES
 (1, 'Zinger Burger', 'https://placehold.co/800x600/3d1218/e63946?text=Zinger+Burger', ARRAY['Chicken Zinger', 'Spicy Zinger', 'Zinger'], 'Burgers', 447, true, true),
@@ -224,7 +227,7 @@ VALUES
 (402, 'Cold Drink', 90, 4, 6, 'https://placehold.co/800x600/3d1218/e63946?text=Cold+Drink', true, 'Drinks'),
 (501, 'Chicken Shawarma', 280, 5, 5, 'https://placehold.co/800x600/3d1218/e63946?text=Chicken+Shawarma', true, 'Wraps'),
 (502, 'Cold Drink', 80, 5, 6, 'https://placehold.co/800x600/3d1218/e63946?text=Cold+Drink', true, 'Drinks')
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET available = EXCLUDED.available, price = EXCLUDED.price;
 
 SELECT setval('menu_items_id_seq', (SELECT MAX(id) FROM public.menu_items));
 
@@ -238,21 +241,51 @@ ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
 
+-- ─── HELPER FUNCTIONS (Avoid RLS Recursion) ──────────────────────────────────
+CREATE OR REPLACE FUNCTION public.get_user_role()
+RETURNS TEXT AS $$
+  SELECT role FROM public.users WHERE id = auth.uid();
+$$ LANGUAGE sql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+  SELECT COALESCE(public.get_user_role() = 'Admin', false);
+$$ LANGUAGE sql SECURITY DEFINER;
+
+-- ─── UPDATED POLICIES (RLS) ──────────────────────────────────────────────────
+DROP POLICY IF EXISTS "Admin full access" ON public.users;
+DROP POLICY IF EXISTS "Admin full access" ON public.restaurants;
+DROP POLICY IF EXISTS "Admin full access" ON public.normalized_items;
+DROP POLICY IF EXISTS "Admin full access" ON public.menu_items;
+DROP POLICY IF EXISTS "Admin full access" ON public.orders;
+
+CREATE POLICY "Admin full access" ON public.users FOR ALL USING (public.is_admin());
+CREATE POLICY "Admin full access" ON public.restaurants FOR ALL USING (public.is_admin());
+CREATE POLICY "Admin full access" ON public.normalized_items FOR ALL USING (public.is_admin());
+CREATE POLICY "Admin full access" ON public.menu_items FOR ALL USING (public.is_admin());
+CREATE POLICY "Admin full access" ON public.orders FOR ALL USING (public.is_admin());
+
+-- Owner Policies
+CREATE POLICY "Owner update own restaurant" ON public.restaurants 
+FOR UPDATE USING (owner_id = auth.uid());
+
+CREATE POLICY "Owner manage own menu_items" ON public.menu_items 
+FOR ALL USING (
+  EXISTS (
+    SELECT 1 FROM public.restaurants 
+    WHERE id = menu_items.restaurant_id AND owner_id = auth.uid()
+  )
+);
+
+-- Ensure public can still read
+DROP POLICY IF EXISTS "Allow public read access" ON public.users;
 CREATE POLICY "Allow public read access" ON public.users FOR SELECT USING (true);
-CREATE POLICY "Allow auth users to insert profile" ON public.users FOR INSERT WITH CHECK (auth.uid() = id);
-CREATE POLICY "Allow auth users to update profile" ON public.users FOR UPDATE USING (auth.uid() = id);
-
+DROP POLICY IF EXISTS "Allow public read" ON public.restaurants;
 CREATE POLICY "Allow public read" ON public.restaurants FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow public read" ON public.normalized_items;
 CREATE POLICY "Allow public read" ON public.normalized_items FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow public read" ON public.menu_items;
 CREATE POLICY "Allow public read" ON public.menu_items FOR SELECT USING (true);
-CREATE POLICY "Allow public read" ON public.reviews FOR SELECT USING (true);
-
-CREATE POLICY "Allow auth insert review" ON public.reviews FOR INSERT WITH CHECK (auth.role() = 'authenticated');
-
-CREATE POLICY "Allow public insert to orders" ON public.orders FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public read to personal orders" ON public.orders FOR SELECT USING (true);
-CREATE POLICY "Allow public insert to order_items" ON public.order_items FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public read to order_items" ON public.order_items FOR SELECT USING (true);
 
 -- ─── MANUAL ROLE ELEVATION (Run after signing up via UI) ─────────────────────
 -- UPDATE public.users SET role = 'Admin' WHERE email = 'admin@example.com';

@@ -108,16 +108,21 @@ export default function RestaurantDashboard() {
     e.preventDefault();
     try {
       const table = activeTab === 'Profile' ? 'restaurants' : 'menu_items';
+      
+      // Remove restricted fields
+      const { id, created_at, owner_id, restaurant_id, normalized_item_id, ...updateData } = formData;
+
       const { error } = await supabase
         .from(table)
-        .update(formData)
+        .update(updateData)
         .eq('id', editingItem.id);
 
       if (error) throw error;
       setIsModalOpen(false);
       activeTab === 'Profile' ? fetchRestaurant() : fetchData();
     } catch (error) {
-      alert('Error saving changes: ' + error.message);
+      console.error('Update Error:', error);
+      alert('Error saving changes: ' + (error.message || 'Check console for details'));
     }
   };
 

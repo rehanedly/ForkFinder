@@ -19,8 +19,10 @@ export default function ProtectedRoute({ allowedRoles }) {
 
   // Check if role is allowed
   const userRole = user.role || user.user_metadata?.role;
+  console.log('[ProtectedRoute] User:', user.email, 'Role detected:', userRole, 'Allowed:', allowedRoles);
   
   if (allowedRoles && !allowedRoles.includes(userRole)) {
+    console.warn('[ProtectedRoute] Access denied. Redirecting...');
     return <Navigate to="/" replace />;
   }
 

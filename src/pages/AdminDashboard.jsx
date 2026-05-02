@@ -97,16 +97,20 @@ export default function AdminDashboard() {
         'Menus': 'normalized_items'
       };
 
+      // Remove restricted fields
+      const { id, created_at, owner_id, ...updateData } = formData;
+
       const { error } = await supabase
         .from(tableMap[activeTab])
-        .update(formData)
+        .update(updateData)
         .eq('id', editingItem.id);
 
       if (error) throw error;
       setIsModalOpen(false);
       fetchData();
     } catch (error) {
-      alert('Error saving changes: ' + error.message);
+      console.error('Update Error:', error);
+      alert('Error saving changes: ' + (error.message || 'Check console for details'));
     }
   };
 
